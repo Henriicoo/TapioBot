@@ -1,5 +1,6 @@
 package com.henriquenapimo1.tapio.commands.arcade;
 
+import com.henriquenapimo1.tapio.TapioBot;
 import com.henriquenapimo1.tapio.commands.ICommand;
 import com.henriquenapimo1.tapio.utils.CommandContext;
 import com.henriquenapimo1.tapio.utils.music.MusicQuizManager;
@@ -42,10 +43,17 @@ public class MusicQuizCommand implements ICommand {
     public void run(@NotNull CommandContext ctx) {
         assert ctx.getEvent().getGuild() != null;
 
-        if(ctx.getMember().getVoiceState() == null) {
+        if(ctx.getMember().getVoiceState() == null || !ctx.getMember().getVoiceState().inAudioChannel()) {
             ctx.replyEphemeral("Você não pode jogar o quiz sem estar num canal de voz!");
             return;
         }
+
+        if(TapioBot.getSpotifyAPI().getPlaylistTracks(ctx.getOptions().get(0).getAsString()) == null) {
+            ctx.replyEphemeral("Espere alguns segundos para jogar...");
+            return;
+        }
+
+        ctx.replyEphemeral("Iniciando o quiz!");
 
         ctx.getEvent().getGuild().getAudioManager().openAudioConnection(ctx.getMember().getVoiceState().getChannel());
         MusicQuizManager.getInstance().startQuiz(ctx.getOptions().get(0).getAsString(), ctx.getChannel());

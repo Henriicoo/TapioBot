@@ -16,8 +16,6 @@ public class InteractionListener extends ListenerAdapter {
         System.out.format("⨠ %s em #%s usou → /%s %s %s%n",event.getUser().getAsTag(),event.getChannel().getName(),
                 event.getName(),event.getSubcommandName()!=null  ? event.getSubcommandName() : "",event.getOptions().isEmpty() ? "" : event.getOptions());
 
-        event.deferReply().queue();
-
         TapioBot.getManager().runCommand(event.getName(),
                 new CommandContext(event,event.getUser()));
     }
@@ -30,7 +28,6 @@ public class InteractionListener extends ListenerAdapter {
             return;
 
         if(event.getButton().getId().startsWith("tapiomusicquiz_")) {
-            event.deferReply().queue();
 
             MusicQuizManager.getInstance().answer(event);
             return;

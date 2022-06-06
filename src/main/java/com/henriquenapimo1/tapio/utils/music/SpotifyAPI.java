@@ -2,7 +2,9 @@ package com.henriquenapimo1.tapio.utils.music;
 
 import com.henriquenapimo1.tapio.utils.Utils;
 import se.michaelthelin.spotify.SpotifyApi;
+import se.michaelthelin.spotify.model_objects.credentials.ClientCredentials;
 import se.michaelthelin.spotify.model_objects.specification.Track;
+import se.michaelthelin.spotify.requests.authorization.client_credentials.ClientCredentialsRequest;
 
 import java.util.*;
 
@@ -15,8 +17,15 @@ public class SpotifyAPI {
         this.api = new SpotifyApi.Builder()
                 .setClientId(Utils.spotifyID)
                 .setClientSecret(Utils.spotifySecret)
-                .setAccessToken(Utils.spotifyToken)
                 .build();
+
+        ClientCredentialsRequest clientCredentialsRequest = api.clientCredentials().build();
+        try {
+            final ClientCredentials clientCredentials = clientCredentialsRequest.execute();
+            api.setAccessToken(clientCredentials.getAccessToken());
+        }catch (Exception e) {
+            //
+        }
 
         this.quizPlaylists = new HashMap<>();
     }
@@ -47,6 +56,8 @@ public class SpotifyAPI {
                     throw new RuntimeException(e);
                 }
             });
+
+            System.out.println("Playlists carregadas com sucesso!");
             return previewMap;
         } catch (Exception e) {
             throw new RuntimeException(e);
