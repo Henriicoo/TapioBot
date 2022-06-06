@@ -22,12 +22,11 @@ public class MusicQuizManager {
     private static MusicQuizManager INSTANCE;
     private final Map<Long, MusicQuizManager> quizManager;
 
-    // TODO: MUDAR O TIPO DE GERENCIADOR, DE INSTANCE PRO NORMAL
-    // TODO: END GAME e RESET
-
     public MusicQuizManager() {
         quizManager = new HashMap<>();
     }
+
+    private boolean isInGame = false;
 
     private List<QuizTrack> originalPlaylist;
     private List<QuizTrack> gamePlaylist;
@@ -47,7 +46,10 @@ public class MusicQuizManager {
         errado, a música é pulada. Quem tiver mais pontos no final, ganha
          */
 
-        System.out.println("Iniciando o quiz!");
+        if(isInGame)
+            return;
+
+        isInGame = true;
 
         txtChannel = channel;
         originalPlaylist = gamePlaylist = TapioBot.getSpotifyAPI().getPlaylistTracks(type);
@@ -67,8 +69,6 @@ public class MusicQuizManager {
                 .setTimestamp(Instant.now())
                 .setFooter("Quiz Musical - TEMA " + type)
                 .build()).build()).queue();
-
-        System.out.println("Timer de 5s iniciado");
 
         timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -104,9 +104,6 @@ public class MusicQuizManager {
         quizType = type;
 
         for(int i = 0; i < 5; i++) {
-            if(tracks.get(i).equals(track))
-                rightAnswerID = "tapiomusicquiz_"+i;
-
             switch (type) {
                 case FULL -> {
                     String name = tracks.get(i).getName() + " - " + tracks.get(i).getArtist();
@@ -124,6 +121,10 @@ public class MusicQuizManager {
                     btn.add(Button.secondary("tapiomusicquiz_" + i, name));
                 }
             }
+
+            if(tracks.get(i).equals(track)) {
+                rightAnswerID = "tapiomusicquiz_" + i;
+            }
         }
 
         return btn;
@@ -134,6 +135,11 @@ public class MusicQuizManager {
     public void answer(ButtonInteractionEvent event) {
         assert event.getButton().getId() != null;
         assert event.getMember() != null;
+
+        if(!isInGame) {
+            event.reply("Não há nenhum quiz acontecendo no momento!").setEphemeral(true).queue();
+            return;
+        }
 
         // se o usuário não está no canal de voz
         if(!event.getMember().getVoiceState().inAudioChannel() || !event.getMember().getVoiceState().getChannel().equals(
@@ -197,14 +203,14 @@ public class MusicQuizManager {
             StringBuilder placar = new StringBuilder();
 
             for (Object e : a) {
-                placar.append(String.format("**%s**",(txtChannel.getGuild().getMemberById(Long.parseLong(((Map.Entry<String, Integer>) e).getKey())).getAsMention()))).append(" → ").append(((Map.Entry<String, Integer>) e).getValue()).append(" pontos;\n");
+                placar.append(String.format("**%s**",(txtChannel.getGuild().getMemberById(String.valueOf(((Map.Entry<String, Integer>) e).getKey())).getAsMention()))).append(" → **").append(((Map.Entry<String, Integer>) e).getValue()).append("** pontos;\n");
             }
 
             timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override
                 public void run() {
-                    txtChannel.sendMessage(new MessageBuilder().append("Fim de Jogo!").setEmbeds(new EmbedBuilder()
+                    txtChannel.sendMessage(new MessageBuilder().setEmbeds(new EmbedBuilder()
                                     .setTitle("Fim de Jogo!")
                                     .setDescription("O jogo terminou. Veja o placar de pontos de cada um:\n \n"+ placar)
                                     .setColor(new Color(99,89,148))
@@ -214,7 +220,7 @@ public class MusicQuizManager {
                     PlayerManager.getInstance().getMusicManager(txtChannel.getGuild()).audioPlayer.stopTrack();
                     txtChannel.getGuild().getAudioManager().closeAudioConnection();
 
-                    timer.cancel();
+                    endGame();
                 }
                 },5*1000);
             return;
@@ -279,12 +285,34 @@ public class MusicQuizManager {
         }
     }
 
+    private void endGame() {
+        quizType = null;
+        round = 0;
+        originalPlaylist = null;
+        gamePlaylist = null;
+        txtChannel = null;
+
+        if(timer != null)
+            timer.cancel();
+
+        timer = null;
+        rightAnswerID = "";
+        rightAnswerString = "";
+        gameMessage = null;
+
+        isInGame = false;
+    }
+
     private enum QuizType {
         FULL, NAME, ARTIST
     }
 
     public MusicQuizManager getManager(long guildId) {
         return this.quizManager.computeIfAbsent(guildId, (id) -> INSTANCE);
+    }
+
+    public boolean isInGame() {
+        return isInGame;
     }
 
     public static MusicQuizManager getInstance() {

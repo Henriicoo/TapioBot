@@ -33,6 +33,9 @@ public class SpotifyAPI {
     public void loadPlaylists() {
         Map<String,String> playlists = new HashMap<>();
         playlists.put("indie2016","37i9dQZF1DX0XnW5YpwS0o");
+        playlists.put("classicrock","37i9dQZF1DWXRqgorJj26U");
+        playlists.put("tophits","37i9dQZF1DXcBWIGoYBM5M");
+        playlists.put("topbrasil","37i9dQZF1DX0FOF1IUWK1W");
         // TODO: mais playlists
 
         playlists.forEach((name,id) -> quizPlaylists.put(name,getPreviewFromPlaylist(id)));
@@ -57,7 +60,7 @@ public class SpotifyAPI {
                 }
             });
 
-            System.out.println("Playlists carregadas com sucesso!");
+            System.out.println("Playlist carregada com sucesso!");
             return previewMap;
         } catch (Exception e) {
             throw new RuntimeException(e);

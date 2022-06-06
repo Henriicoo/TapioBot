@@ -31,7 +31,10 @@ public class MusicQuizCommand implements ICommand {
     public List<SubcommandData> getSubcommands() {
         return List.of(new SubcommandData("iniciar","Inicia o quiz musical. (É preciso estar num canal de voz)")
                 .addOptions(new OptionData(OptionType.STRING,"genero","O gênero que será usado no jogo",true)
-                        .addChoice("Indie 2016","indie2016")));
+                        .addChoice("Indie 2016","indie2016")
+                        .addChoice("Rock Clássico","classicrock")
+                        .addChoice("Top Hits","tophits")
+                        .addChoice("Top Brasil","topbrasil")));
     }
 
     @Override
@@ -42,6 +45,11 @@ public class MusicQuizCommand implements ICommand {
     @Override
     public void run(@NotNull CommandContext ctx) {
         assert ctx.getEvent().getGuild() != null;
+
+        if(MusicQuizManager.getInstance().getManager(ctx.getEvent().getGuild().getIdLong()).isInGame()) {
+            ctx.replyEphemeral("Já tem um jogo acontecendo! Você não pode iniciar um novo");
+            return;
+        }
 
         if(ctx.getMember().getVoiceState() == null || !ctx.getMember().getVoiceState().inAudioChannel()) {
             ctx.replyEphemeral("Você não pode jogar o quiz sem estar num canal de voz!");
