@@ -62,6 +62,8 @@ public class LolCommand implements ICommand {
 
     @Override
     public void run(@NotNull CommandContext ctx) {
+        ctx.getEvent().deferReply().queue();
+
         if(ctx.getSubCommand().equals("partida"))
             lastMatch(ctx,ctx.getOptions().get(0).getAsString());
 
