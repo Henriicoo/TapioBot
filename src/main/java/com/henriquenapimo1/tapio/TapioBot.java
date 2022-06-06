@@ -20,7 +20,7 @@ public class TapioBot {
     public static void main(String[] args) throws LoginException {
         manager = new CommandManager();
 
-        bot = JDABuilder.createDefault(Utils.token)
+        bot = JDABuilder.createDefault(Utils.discordToken)
                 .setActivity(Activity.playing("a vida fora"))
                 .setStatus(OnlineStatus.ONLINE)
                 .addEventListeners(new InteractionListener())

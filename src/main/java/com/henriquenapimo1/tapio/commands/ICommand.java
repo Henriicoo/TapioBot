@@ -37,7 +37,7 @@ public interface ICommand {
     void run(@NotNull CommandContext ctx);
 
     enum CommandCategory {
-        ARCADE, DISCORD, UTILS, STUDIE, FUN, MUSIC
+        ARCADE, DISCORD, UTILS, STUDIE, FUN, MUSIC, GAMES
     }
 }
 

@@ -43,7 +43,7 @@ public class LolCommand implements ICommand {
 
     @Override
     public CommandCategory getCategory() {
-        return CommandCategory.ARCADE;
+        return CommandCategory.GAMES;
     }
 
     @Override
