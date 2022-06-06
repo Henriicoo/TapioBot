@@ -3,6 +3,7 @@ package com.henriquenapimo1.tapio;
 import com.henriquenapimo1.tapio.commands.CommandManager;
 import com.henriquenapimo1.tapio.listener.InteractionListener;
 import com.henriquenapimo1.tapio.utils.Utils;
+import com.henriquenapimo1.tapio.utils.music.SpotifyAPI;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -16,6 +17,7 @@ public class TapioBot {
     private static JDA bot;
     private static R4J riotApi;
     private static CommandManager manager;
+    private static SpotifyAPI spotifyAPI;
 
     public static void main(String[] args) throws LoginException {
         manager = new CommandManager();
@@ -32,11 +34,20 @@ public class TapioBot {
 
         System.out.println("→ " + manager.getCommandSize() + " comandos foram carregados!");
 
+        System.out.println("Carregando APIs...");
         riotApi = new R4J(new APICredentials(Utils.riotApi));
+        spotifyAPI = new SpotifyAPI();
+
+        System.out.println("Carregando playlists do Quiz Musical");
+        spotifyAPI.loadPlaylists();
     }
 
     public static R4J getRiotApi() {
         return riotApi;
+    }
+
+    public static SpotifyAPI getSpotifyAPI() {
+        return spotifyAPI;
     }
 
     public static JDA getBot() {

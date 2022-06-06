@@ -3,6 +3,7 @@ package com.henriquenapimo1.tapio.listener;
 import com.henriquenapimo1.tapio.TapioBot;
 import com.henriquenapimo1.tapio.commands.games.LolCommand;
 import com.henriquenapimo1.tapio.utils.CommandContext;
+import com.henriquenapimo1.tapio.utils.music.MusicQuizManager;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -25,7 +26,17 @@ public class InteractionListener extends ListenerAdapter {
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
         System.out.format("⨠ %s em #%s usou o botão → %s%n",event.getUser().getAsTag(),event.getChannel().getName(),event.getButton().getId());
 
-        if(event.getButton().getId() != null && event.getButton().getId().startsWith("tapiolastmatch_")) {
+        if(event.getButton().getId() == null)
+            return;
+
+        if(event.getButton().getId().startsWith("tapiomusicquiz_")) {
+            event.deferReply().queue();
+
+            MusicQuizManager.getInstance().answer(event);
+            return;
+        }
+
+        if(event.getButton().getId().startsWith("tapiolastmatch_")) {
             String name = event.getButton().getId().replace("tapiolastmatch_","");
 
             event.deferReply().queue();
