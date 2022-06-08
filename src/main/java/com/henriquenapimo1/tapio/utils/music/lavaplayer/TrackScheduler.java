@@ -1,5 +1,6 @@
 package com.henriquenapimo1.tapio.utils.music.lavaplayer;
 
+import com.henriquenapimo1.tapio.utils.music.MusicQuizManager;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
@@ -13,10 +14,12 @@ public class TrackScheduler extends AudioEventAdapter {
     public final AudioPlayer player;
     public final BlockingQueue<AudioTrack> queue;
     public boolean repeating = false;
+    private final GuildMusicManager manager;
 
-    public TrackScheduler(AudioPlayer player) {
+    public TrackScheduler(AudioPlayer player,GuildMusicManager manager) {
         this.player = player;
         this.queue = new LinkedBlockingQueue<>();
+        this.manager = manager;
     }
 
     public void queue(AudioTrack track) {
@@ -31,6 +34,9 @@ public class TrackScheduler extends AudioEventAdapter {
 
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
+        if(MusicQuizManager.getInstance().getManager(manager.getPlayerManager().getChannel().getGuild().getIdLong()).isInGame())
+            MusicQuizManager.getInstance().getManager(manager.getPlayerManager().getChannel().getGuild().getIdLong()).timesOver();
+
         if (endReason.mayStartNext) {
             if (this.repeating) {
                 this.player.startTrack(track.makeClone(), false);

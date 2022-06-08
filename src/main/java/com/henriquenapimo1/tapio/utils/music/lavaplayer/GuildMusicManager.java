@@ -10,14 +10,21 @@ public class GuildMusicManager {
 
     private final AudioPlayerSendHandler sendHandler;
 
-    public GuildMusicManager(AudioPlayerManager manager) {
+    private final PlayerManager playerManager;
+
+    public GuildMusicManager(AudioPlayerManager manager, PlayerManager playerManager) {
         this.audioPlayer = manager.createPlayer();
-        this.scheduler = new TrackScheduler(this.audioPlayer);
+        this.scheduler = new TrackScheduler(this.audioPlayer,this);
         this.audioPlayer.addListener(this.scheduler);
         this.sendHandler = new AudioPlayerSendHandler(this.audioPlayer);
+        this.playerManager = playerManager;
     }
 
     public AudioPlayerSendHandler getSendHandler() {
         return sendHandler;
+    }
+
+    public PlayerManager getPlayerManager() {
+        return playerManager;
     }
 }

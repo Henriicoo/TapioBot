@@ -42,8 +42,9 @@ public class MusicQuizManager {
         dá load na playlist (limita por algumas tracks, ex. 10), seta o canal e começa um timer de 15 segundos
         manda uma mensagem no chat pedindo o NOME ou o AUTOR da música
         com alguns botões de opções. Os jogadores NO CANAL tem até o término do
-        temporizador para acertarem. Só podem chutar UMA VEZ com certeza. Caso respondam
-        errado, a música é pulada. Quem tiver mais pontos no final, ganha
+        temporizador para acertarem. Só podem responder UMA VEZ com certeza. Caso respondam
+        errado, a música é pulada, caso respondam certo, o jogador leva um ponto.
+         Quem tiver mais pontos no final, ganha
          */
 
         if(isInGame)
@@ -58,17 +59,19 @@ public class MusicQuizManager {
         gamePlaylist = gamePlaylist.stream().limit(10).toList();
 
         txtChannel.sendMessage(new MessageBuilder().setEmbeds(new EmbedBuilder()
-                .setAuthor("Quiz Musical 🎵")
-                .setColor(new Color(99,89,148))
-                .appendDescription("""
+                        .setTitle("Quiz Musical 🎵")
+                        .setColor(new Color(99,89,148))
+                        .appendDescription("""
                         **Como jogar?**
                         Uma música será tocada por `30` segundos, e o seu objetivo é acertar o nome ou o cantor dela, usando botões, que estarão em baixo da mensagem. Vence o jogador que apertar o botão **CORRETO** primeiro.
                         Caso o botão errado seja pressionado, todos perdem e começará a próxima música.
                         O jogo será iniciado em `5` segundos. Todos os participantes deverão estar no *mesmo canal* de voz.
                         **Bom jogo**!""")
-                .setTimestamp(Instant.now())
-                .setFooter("Quiz Musical - TEMA " + type)
-                .build()).build()).queue();
+                        .setTimestamp(Instant.now())
+                        .setFooter("Quiz Musical - TEMA " + type)
+                        .build()
+                ).build()
+        ).queue();
 
         timer = new Timer();
         timer.schedule(new TimerTask() {
@@ -104,26 +107,25 @@ public class MusicQuizManager {
         quizType = type;
 
         for(int i = 0; i < 5; i++) {
+            boolean isEqual = tracks.get(i).equals(track);
+            if(isEqual) rightAnswerID = "tapiomusicquiz_" + i;
+
             switch (type) {
                 case FULL -> {
                     String name = tracks.get(i).getName() + " - " + tracks.get(i).getArtist();
-                    rightAnswerString = name;
+                    if(isEqual) rightAnswerString = name;
                     btn.add(Button.secondary("tapiomusicquiz_" + i, name));
                 }
                 case NAME -> {
                     String name = tracks.get(i).getName();
-                    rightAnswerString = name;
+                    if(isEqual) rightAnswerString = name;
                     btn.add(Button.secondary("tapiomusicquiz_" + i, name));
                 }
                 case ARTIST -> {
                     String name = tracks.get(i).getArtist();
-                    rightAnswerString = name;
+                    if(isEqual) rightAnswerString = name;
                     btn.add(Button.secondary("tapiomusicquiz_" + i, name));
                 }
-            }
-
-            if(tracks.get(i).equals(track)) {
-                rightAnswerID = "tapiomusicquiz_" + i;
             }
         }
 
@@ -147,7 +149,6 @@ public class MusicQuizManager {
             event.reply("Você não está participando do jogo. Entre no canal de voz para participar").setEphemeral(true).queue();
             return;
         }
-
         timer.cancel();
 
         if(event.getButton().getId().equals(rightAnswerID)) { // ganhou!
@@ -171,7 +172,6 @@ public class MusicQuizManager {
     private Message gameMessage;
 
     private void newRound(boolean isNew, boolean rightAnswer, boolean timesUp, Long id) {
-
         if(!isNew) { // pula a música e manda a resposta correta
             PlayerManager.getInstance().getMusicManager(txtChannel.getGuild()).audioPlayer.stopTrack();
             String status = "Ninguém acertou!";
@@ -182,7 +182,7 @@ public class MusicQuizManager {
                 status = "O tempo para resposta ACABOU!";
 
             String aviso = "Um novo round irá começar em 5 segundos.";
-            if(round==9)
+            if(round==10)
                 aviso = "Fim de jogo. Aguarde para ver o placar.";
 
             gameMessage.editMessage(new MessageBuilder().setEmbeds(new EmbedBuilder()
@@ -213,9 +213,11 @@ public class MusicQuizManager {
                     txtChannel.sendMessage(new MessageBuilder().setEmbeds(new EmbedBuilder()
                                     .setTitle("Fim de Jogo!")
                                     .setDescription("O jogo terminou. Veja o placar de pontos de cada um:\n \n"+ placar)
+                                    .setTimestamp(Instant.now())
                                     .setColor(new Color(99,89,148))
                                     .build())
-                            .build()).queue();
+                            .build()
+                    ).queue();
 
                     PlayerManager.getInstance().getMusicManager(txtChannel.getGuild()).audioPlayer.stopTrack();
                     txtChannel.getGuild().getAudioManager().closeAudioConnection();
@@ -241,16 +243,11 @@ public class MusicQuizManager {
         startRound();
     }
 
-    private void startRound() {
-        timer = new Timer();
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                newRound(false,false, true,null);
-                timer.cancel();
-            }
-        },30*1000);
+    public void timesOver() {
+        newRound(false,false, true,null);
+    }
 
+    private void startRound() {
         PlayerManager.getInstance().loadAndPlay(txtChannel,gamePlaylist.get(round).getAudioURL());
         List<Button> botoes = getShuffledButtons(gamePlaylist.get(round));
 

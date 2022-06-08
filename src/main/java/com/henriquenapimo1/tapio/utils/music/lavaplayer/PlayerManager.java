@@ -30,7 +30,7 @@ public class PlayerManager {
 
     public GuildMusicManager getMusicManager(Guild guild) {
         return this.musicManagers.computeIfAbsent(guild.getIdLong(), (guildId) -> {
-            final GuildMusicManager guildMusicManager = new GuildMusicManager(this.audioPlayerManager);
+            final GuildMusicManager guildMusicManager = new GuildMusicManager(this.audioPlayerManager,this);
 
             guild.getAudioManager().setSendingHandler(guildMusicManager.getSendHandler());
 
@@ -38,8 +38,11 @@ public class PlayerManager {
         });
     }
 
+    private TextChannel channel;
+
     public void loadAndPlay(TextChannel channel, String trackUrl) {
         final GuildMusicManager musicManager = this.getMusicManager(channel.getGuild());
+        this.channel = channel;
 
         this.audioPlayerManager.loadItemOrdered(musicManager, trackUrl, new AudioLoadResultHandler() {
             @Override
@@ -64,6 +67,10 @@ public class PlayerManager {
                 channel.sendMessage("Opa! Ocorreu um erro ao tentar carregar a música!").queue();
             }
         });
+    }
+
+    public TextChannel getChannel() {
+        return channel;
     }
 
     public static PlayerManager getInstance() {
