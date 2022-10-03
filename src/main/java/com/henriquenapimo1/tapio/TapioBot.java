@@ -2,6 +2,7 @@ package com.henriquenapimo1.tapio;
 
 import com.henriquenapimo1.tapio.commands.CommandManager;
 import com.henriquenapimo1.tapio.listener.InteractionListener;
+import com.henriquenapimo1.tapio.utils.Eleicoes;
 import com.henriquenapimo1.tapio.utils.Utils;
 import com.henriquenapimo1.tapio.utils.music.SpotifyAPI;
 import net.dv8tion.jda.api.JDA;
@@ -12,6 +13,10 @@ import no.stelar7.api.r4j.basic.APICredentials;
 import no.stelar7.api.r4j.impl.R4J;
 
 import javax.security.auth.login.LoginException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class TapioBot {
     private static JDA bot;
@@ -36,10 +41,18 @@ public class TapioBot {
 
         System.out.println("Carregando APIs...");
         riotApi = new R4J(new APICredentials(Utils.riotApi));
-        spotifyAPI = new SpotifyAPI();
+        /*spotifyAPI = new SpotifyAPI();
 
         System.out.println("Carregando playlists do Quiz Musical");
-        spotifyAPI.loadPlaylists();
+        spotifyAPI.loadPlaylists();*/
+
+        try {
+            Thread.sleep(5 * 1000);
+        } catch (InterruptedException ie) {
+            Thread.currentThread().interrupt();
+        }
+
+        new Eleicoes();
     }
 
     public static R4J getRiotApi() {
